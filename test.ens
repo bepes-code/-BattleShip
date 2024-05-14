@@ -1,0 +1,38 @@
+PANTALLA EQU 0B000h
+ORIGEN 400h
+INICIO ini
+.CODIGO
+
+ini:
+	MOVH R0, BYTEALTO PANTALLA
+	MOVL R0, BYTEBAJO PANTALLA
+	
+	; activar pantalla 00000010
+	; borrar pantalla  00000001
+	; accedir al registre de control
+	; 00000000 00000011
+	
+	; registre control = BASE + 120 = R0 + 120
+	MOVH R1, 00h
+	MOVL R1, 120
+	ADD R1, R0, R1	; R1 = BASE + 120 => registre control
+	
+	MOVH R2, 00h
+	MOVL R2, 00000011b	; MOVL R2, 03h
+	MOV [R1], R2
+	
+	; escriure una lletra
+	; registre = 00FFFCCC LLLLLLLL
+	; high = 00 fons caracter
+	; low  = caracter
+	MOVH R2, 00000111b	; NEGRE-BLANC
+	MOVL R2, 48h	; lletra H
+	MOV [R0], R2
+	
+	INC R0 ; Canviem de posicio de pantalla
+	MOVH R2, 00111000b	
+	MOVL R2, 4Fh	; lletra O
+	MOV [R0], R2
+	
+	jmp -1
+FIN
