@@ -5,25 +5,33 @@
 ; Sessió: PR-PRA2
 ; --------------------------------------------------------------- 
 
+;---------------------------------------
+;| BATELSHIP GAME BY ALEIX & GUILLERMO |
+;---------------------------------------
+
+; Inicialitzem el teclat i la pantalla a les seves dirrecion
 TECLAT EQU 0E00h
 PANTALLA EQU 0F00h
 
+; Definim el origen de memoria del programa
 ORIGEN 010h
 
 INICIO ini
 .DATOS
 	; Display de la pantalla de inici 
-	text_splash_1 VALOR "BATELSHIP GAME"
-	text_splash_2 VALOR "BATELSHIP GAME"
-	text_splash_3 VALOR "BATELSHIP GAME"
-	text_splash_4 VALOR "BATELSHIP GAME"
-	text_splash_5 VALOR "BATELSHIP GAME"
-	text_splash_6 VALOR "BATELSHIP GAME"
-	text_splash_7 VALOR "BATELSHIP GAME"
+	text_splash_1 VALOR "---------------"
+	text_splash_2 VALOR "BATELSHIP  GAME"
+	text_splash_3 VALOR "       BY      "
+	text_splash_4 VALOR "Aleix  Rosinach"
+	text_splash_5 VALOR "       &       "
+	text_splash_6 VALOR "Guillermo Esq. "
+	text_splash_7 VALOR "---------------"
+	text_splash_8 VALOR "PRESS SPACE NOW"
+
 	
 	
 	;Vectors per imprimir la graella del joc
-	graella_horitzontal VALOR "ABCDEF"
+	graella_horitzontal VALOR " ABCDEFGHIJ    "
 	graella_vertical VALOR " 123456 "
 	
 	;Vector per demanar les cordenades del jugador
@@ -195,5 +203,12 @@ ini: ;programa principal
 			BRNZ imprimir_graella_vertical
 		RET
 		
+	
+	
+	JMP final
+	RET
 		
-FIN
+
+
+final:
+	FIN
