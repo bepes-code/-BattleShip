@@ -5,8 +5,8 @@
 ; Sessió: PR-PRA2
 ; --------------------------------------------------------------- 
 
-TECLAT EQU E000h
-PANTALLA EQU F000h
+TECLAT EQU 0E00h
+PANTALLA EQU 0F00h
 
 ORIGEN 010h
 
@@ -33,7 +33,7 @@ INICIO ini
 	intents VALOR 0
 	
 	;Vectir per a desar les coordenades introduir per teclat 
-	cordenada_x VALOR '  '
+	cordenada_x VALOR 0
 	cordenada_y VALOR 0
 	
 	
@@ -60,7 +60,7 @@ ini: ;programa principal
 	
 	; Mostrem pantalla de inici del joc
 	MOVH R0, BYTEALTO DIRECCION splash
-	MOVH R0, BYTEBAJO DIRECCION splash
+	MOVL R0, BYTEBAJO DIRECCION splash
 	CALL R0
 	
 	; Escoltem el teclat fins que es premi la tecla espai
@@ -103,8 +103,8 @@ ini: ;programa principal
 		MOVH R2, 00h
 		MOVL R2, 120
 		
-		MOVH R3, BYTEALTO text_splash_1
-		MOVL R3, BYTEBAJO text_splash_1
+		MOVH R3, BYTEALTO DIRECCION text_splash_1
+		MOVL R3, BYTEBAJO DIRECCION text_splash_1
 		
 		imprimir_titol:
 			MOV R4, [R3]
@@ -136,8 +136,8 @@ ini: ;programa principal
 	; Funcio esperar espai
 	esperant_espai:
 		
-		MOVH R0, BYTEALTO consulta_estat_teclat
-		MOVL R0, BYTEALTO consulta_estat_teclat
+		MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
+		MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
 		CALL R0
 		
 		; Si estem aqui vol dir que s'ha premut añlguna tecla al teclat, ara mirarem quina
@@ -153,7 +153,7 @@ ini: ;programa principal
 		
 		; Comparem si el resultat es igual
 		COMP R1, R0
-		BRZN esperant_espai
+		BRNZ esperant_espai
 		
 		RET
 	
@@ -165,12 +165,12 @@ ini: ;programa principal
 		MOVL R2, 15
 		
 		MOVH R3, BYTEALTO DIRECCION graella_horitzontal
-		MOVH R3, BYTEBAJO DIRECCION graella_horitzontal
+		MOVL R3, BYTEBAJO DIRECCION graella_horitzontal
 		
 		imprimir_graella_horitzontal:
-			MOVH R4, [R3]
+			MOV R4, [R3]
 			MOVH R4, 00110000b
-			MOVH [R0], R4
+			MOV [R0], R4
 			INC R0
 			INC R3
 			DEC R2
@@ -183,16 +183,17 @@ ini: ;programa principal
 		MOVL R2, 8
 		
 		MOVH R3, BYTEALTO DIRECCION graella_vertical
-		MOVH R3, BYTEBAJO DIRECCION graella_vertical
+		MOVL R3, BYTEBAJO DIRECCION graella_vertical
 		imprimir_graella_vertical:
-			MOVH R4, [R3]
+			MOV R4, [R3]
 			MOVH R4, 00110000b
-			MOVH [R0], R4
+			MOV [R0], R4
+			ADD R0, R0, R1
 			INC R0
 			INC R3
 			DEC R2
 			BRNZ imprimir_graella_vertical
-		
+		RET
 		
 		
 FIN
