@@ -223,18 +223,36 @@ ini: ;programa principal
 		
 		
 		
+		
 		imprimir_tablero:
 			MOVH R2, 00h
 			MOVL R2, 6
 			
-		
+			
+			MOVH R5, 00h
+			MOVL R5, 1
+			; Memoreis dispinibles, R5, R7
+			
+			
+			canvi_color:
+				MOVH R4, 00001000b
+				;ADD R7, R7, R5
+				XOR R7,R7,R7
+				JMP imprimir
+				
 			imprimir_fila:
 				MOV R4, [R3]
-				MOVH R4, 00001000b
-				MOV [R0], R4 ; Mou a  la pantalla
-				INC R0
-				DEC R2
-				BRNZ imprimir_fila
+				MOVH R4, 00111000b
+				COMP R7, R5
+				BRZ canvi_color
+				ADD R7,R7,R5
+				JMP imprimir
+				imprimir:
+					MOV [R0], R4 ; Mou a  la pantalla
+					INC R0
+					DEC R2
+					BRNZ imprimir_fila
+
 
 			ADD R0, R0, R6
 			
