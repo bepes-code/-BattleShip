@@ -9,23 +9,28 @@
 ;| BATELSHIP GAME BY ALEIX & GUILLERMO |
 ;---------------------------------------
 
-; Inicialitzem el teclat i la pantalla a les seves dirrecion
+
+; Inicialitzem el teclat i la pantalla a les seves dirrecions
 TECLAT EQU 0E000h
 PANTALLA EQU 0F000h
+
 ; Definim el origen de memoria del programa
 ORIGEN 010h
 
 INICIO ini
 .DATOS
-	; Display de la pantalla de inici 
+
+	; Pantalla inciial del joc 
+	
 	text_splash_1 VALOR "---------------"
 	text_splash_2 VALOR "BATELSHIP  GAME"
-	text_splash_3 VALOR "       BY      "
+	text_splash_3 VALOR "      BY       "
 	text_splash_4 VALOR "Aleix  Rosinach"
-	text_splash_5 VALOR "       &       "
+	text_splash_5 VALOR "      Y        "
 	text_splash_6 VALOR "Guillermo Esq. "
 	text_splash_7 VALOR "---------------"
 	text_splash_8 VALOR "PRESS SPACE NOW"
+	
 	
 	; Graella del joc
 	text_graella_1 VALOR "    123456     "
@@ -36,38 +41,42 @@ INICIO ini
 	text_graella_6 VALOR "   e           "
 	text_graella_7 VALOR "   f        L= "
 	text_graella_8 VALOR "            N= "
+	
+	
+	; Pantalla final del joc
+	text_win_1 VALOR "---------------"
+	text_win_2 VALOR "  ENORABHONA   "
+	text_win_3 VALOR "               "
+	text_win_4 VALOR "               "
+	text_win_5 VALOR "               "
+	text_win_6 VALOR "Intents =      "
+	text_win_7 VALOR "               "
+	text_win_8 VALOR "---------------"
+	
+	
 	; Graella del tauler
-	text_tauler_1 VALOR  "               "
-	;text_tauler_2 VALOR "      "
-	;text_tauler_3 VALOR "      "
-	;text_tauler_4 VALOR "      "
-	;text_tauler_5 VALOR "      "
-	;text_tauler_6 VALOR "      "
+	text_tauler_1 VALOR "      "
 	
 	
-
+	text_hit VALOR " "            ; Text per imprimir el color del intent 
+	
+	
+	contador_barcos VALOR 0000h   ; Contador de barcos endevinats
+	
+	
+	marcador_intents VALOR 0000h  ; Contador de intents
 	
 	
 	;Vectors per imprimir la graella del joc
 	graella_horitzontal VALOR " ABCDEFGHIJ    "
 	graella_vertical VALOR " 123456 "
 	
-	;Vector per demanar les cordenades del jugador
-	text_coor VALOR "ENTRA CORD:"
-	
-	; Informacio durant el joc
-	intents VALOR 0
-	
-	;Vectir per a desar les coordenades introduir per teclat 
-	cordenada_x VALOR 0
-	cordenada_y VALOR 0
-	
-	
-	;Vectors per a vitoria i derrota
-	text_win VALOR ".--------------------.| YOU WIN | .---------------."
-	text_loose VALOR ".--------------------.| YOU LOOSE | .---------------."
-	
 
+	;Vectir per a desar les coordenades introduir per teclat 
+	coordenada_x VALOR " "
+	coordenada_y VALOR " "
+	
+	
 	;Disposició dels barcos
 				;A B C D E F
 	fila_a VALOR 1,1,1,0,0,0
@@ -76,37 +85,73 @@ INICIO ini
 	fila_d VALOR 1,0,0,0,0,0
 	fila_e VALOR 0,0,0,0,0,1
 	fila_f VALOR 0,0,0,1,0,0 
+	
+	; Variables dels colors
+	
+	
 
 .CODIGO
 ini: ;programa principal
+
 	; Iniciem el programa netejant tota la pantalla
 	MOVH R0, BYTEALTO DIRECCION netejar_pantalla
 	MOVL R0, BYTEBAJO DIRECCION netejar_pantalla
 	CALL R0
+	
 	
 	; Mostrem pantalla de inici del joc
 	MOVH R0, BYTEALTO DIRECCION splash
 	MOVL R0, BYTEBAJO DIRECCION splash
 	CALL R0
 	
-	; Escoltem el teclat fins que es premi la tecla espai
 	
+	; Escoltem el teclat fins que es premi la tecla espai
 	MOVH R0, BYTEALTO DIRECCION esperant_espai
 	MOVL R0, BYTEBAJO DIRECCION esperant_espai
 	CALL R0
+	
 	
 	; ---------- EL JOC S'HA INCIAT --------------
 	; Netejem pantalla
 	MOVH R0, BYTEALTO DIRECCION netejar_pantalla
 	MOVL R0, BYTEBAJO DIRECCION netejar_pantalla
+	CALL R0
 	
-	; imprimir graella per començar el joc
+	
+	; Imprimir graella per començar el joc
 	MOVH R0, BYTEALTO DIRECCION imprimir_graella
 	MOVL R0, BYTEBAJO DIRECCION imprimir_graella
 	CALL R0
-	; Aqui comencaria la logica del joc
 	
+	; El jugador ja ha començat a jugar, s'exectuara mentres no hagi acabat la partida
+	torn_jugador:
 	
+		; Esperem a que el jugador introdueixi les coordenadores per indicar una posició al tauler
+		MOVH R0, BYTEALTO DIRECCION esperant_coordenades_jugador
+		MOVL R0, BYTEBAJO DIRECCION esperant_coordenades_jugador
+		CALL R0
+		
+		
+		; Consultem si la coordenada conte un barco o no
+		MOVH R0, BYTEALTO DIRECCION consultar_hit
+		MOVL R0, BYTEBAJO DIRECCION consultar_hit
+		CALL R0
+		
+		
+		; Comprovem si el jugador ha acabat la partida
+		MOVH R0, BYTEALTO DIRECCION comprovar_final
+		MOVL R0, BYTEBAJO DIRECCION comprovar_final
+		CALL R0
+
+
+	; El joc s'ha acabat
+	MOVH R0, BYTEALTO DIRECCION final
+	MOVL R0, BYTEBAJO DIRECCION final
+	CALL R0
+
+		
+	
+	; DEFINIM LES FUNCIONS
 	
 	; Funcio netejar pantalla 
 	netejar_pantalla:
@@ -119,28 +164,32 @@ ini: ;programa principal
 		MOVH R1, 00h
 		MOVL R1, 11b
 		MOV [R0], R1
-		RET
 		
+		RET
+	
 	; Funció splash
 	splash:
 		MOVH R0, BYTEALTO PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
 		
+		; Definim les posicions que te la pantalla
 		MOVH R2, 00h
-		MOVL R2, 120
+		MOVL R2, 120 
 		
 		MOVH R3, BYTEALTO DIRECCION text_splash_1
 		MOVL R3, BYTEBAJO DIRECCION text_splash_1
 		
 		imprimir_titol:
 			MOV R4, [R3]
-			MOVH R4, 00110000b
+			MOVH R4, 00111000b ; Definim el color de fons de color blanc i el text negre
 			MOV [R0], R4
 			INC R0
 			INC R3
 			DEC R2
 			BRNZ imprimir_titol
 		RET
+		
+		
 	; Funcio que consula el estat del tectlat
 	consulta_estat_teclat:
 		MOVH R0, BYTEALTO TECLAT 
@@ -160,6 +209,7 @@ ini: ;programa principal
 			BRNZ consultar_estat
 		
 	RET
+	
 	; Funcio esperar espai
 	esperant_espai:
 		
@@ -182,8 +232,8 @@ ini: ;programa principal
 		COMP R1, R0
 		BRNZ esperant_espai
 		
-		RET
-	
+	RET
+		
 	imprimir_graella:
 		MOVH R0, BYTEALTO PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
@@ -194,77 +244,373 @@ ini: ;programa principal
 		MOVH R3, BYTEALTO DIRECCION text_graella_1
 		MOVL R3, BYTEBAJO DIRECCION text_graella_1
 		
-		imprimir_titol2:
+		imprimir_fons_graella:
 			MOV R4, [R3]
 			MOVH R4, 00000111b
 			MOV [R0], R4
 			INC R0
 			INC R3
 			DEC R2
-			BRNZ imprimir_titol2
-			
-		MOVH R0, BYTEALTO PANTALLA
-		MOVL R0, BYTEBAJO PANTALLA
+			BRNZ imprimir_fons_graella
 		
-		MOVH R5, 00h
-		MOVL R5, 19
-		
-		ADD R0, R0, R5 ; La patnalla comença a la posicio 19
 	
-		MOVH R3, BYTEALTO DIRECCION text_tauler_1
-		MOVL R3, BYTEBAJO DIRECCION text_tauler_1
 		
+	; Imprimir tauler
+	MOVH R0, BYTEALTO PANTALLA
+	MOVL R0, BYTEBAJO PANTALLA
+	
+	MOVH R1, 00h							  ; R1 ---> "Salt" posicions fins primera pos tauler
+	MOVL R1, 19
+	
+	MOVH R5, 00h							  ; R5 ---> posicio proxima fila
+	MOVL R5, 9
+	
+	ADD R0, R0, R1 							  ; R0 ---> Pimera posicio tauler
+	
+	MOVH R1, 00h 							  ; R1 ---> Iterador files
+	MOVL R1, 6
+	
+	MOVH R3, BYTEALTO DIRECCION text_tauler_1 ; R3 ---> que ha d'escriure a cada fila
+	MOVL R3, BYTEBAJO DIRECCION text_tauler_1
+	
+	MOV R4, [R3]							  ; R4 ---> " "
+	
+	imprimir_files:
+		MOVH R2, 00h 							  ; R1 ---> Iterador imprimir_fila
+		MOVL R2, 6
 		
-		MOVH R1, 00h
-		MOVL R1, 6
+		imprimir_fila_1:			; BLANC -- BLAU -- BLANC -- BLAU -- BLANC -- BLAU
+			MOVH R4, 00111111b		; Color blanc
+			MOV [R0], R4
+			INC R0
+			DEC R2
+			
+			MOVH R4, 00001001b		; Color blau
+			MOV [R0], R4
+			INC R0
+			DEC R2
+			BRNZ imprimir_fila_1
+		
+		MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
+		MOVL R2, 6
+		
+		DEC R1
+		
+		ADD R0, R0, R5				; Passa a la posició fila seg
+		
+		imprimir_fila_2:			; BLAU -- BLANC -- BLAU -- BLANC -- BLAU -- BLANC
+			MOVH R4, 00001001b		; Color blau
+			MOV [R0], R4
+			INC R0
+			DEC R2
+			
+			MOVH R4, 00111111b		; Color blanc
+			MOV [R0], R4
+			INC R0
+			DEC R2
+			BRNZ imprimir_fila_2
+			
+		MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
+		MOVL R2, 6
+		
+		ADD R0, R0, R5				; Passa a la posició fila seg
+		
+		DEC R1
+		
+		BRNZ imprimir_files
+	RET
+	
+	; DEMANAR COORDENADES 
+	
+	esperant_coordenades_jugador:
+		
+		;Llegir buffer 
+		MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
+		MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
+		
+		CALL R0
+		; Comprobar coordenades
+		
+		MOVH R0, BYTEALTO TECLAT
+		MOVL R0, BYTEBAJO TECLAT
+		
+		MOV R1,[R0]
+		MOVH R1,00h
+		
+		MOVH R0, 00h
+		MOVL R0, 'a'
+		
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		MOVL R0, 'b'
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		MOVL R0, 'c'
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		MOVL R0, 'd'
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		MOVL R0, 'e'
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		MOVL R0, 'f'
+		COMP R1, R0
+		BRZ coordenada_y_valida
+		
+		JMP esperant_coordenades_jugador
+		
+		coordenada_y_valida:
+			MOVH R1, BYTEALTO DIRECCION coordenada_y
+			MOVL R1, BYTEBAJO DIRECCION coordenada_y
+			
+			MOV [R1], R0
+			
+			MOVH R1, BYTEALTO PANTALLA 
+			MOVL R1, BYTEBAJO PANTALLA
+			
+			MOVH R2, 00h
+			MOVL R2, 104
+			
+			ADD R1, R1, R2
+			
+			MOVH R0, 00000111b
+			MOV [R1], R0
+		
+		esperant_cordenada_x:
+			MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
+			MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
+			CALL R0
+			
+			coordenada_horitzontal:
+				MOVH R0, BYTEALTO TECLAT
+				MOVL R0, BYTEBAJO TECLAT
+				MOV R1,[R0]
+				MOVH R1,00h
+				
+				MOVH R0, 00h
+				MOVL R0, '1'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+				
+				MOVL R0, '2'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+				
+				MOVL R0, '3'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+				
+				MOVL R0, '4'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+				
+				MOVL R0, '5'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+				
+				MOVL R0, '6'
+				COMP R1,R0
+				BRZ coordenada_x_valida
+
+				JMP esperant_cordenada_x
+				
+				coordenada_x_valida:
+					MOVH R1, BYTEALTO DIRECCION coordenada_x
+					MOVL R1, BYTEBAJO DIRECCION coordenada_x
+					
+					MOV [R1], R0
+					
+					MOVH R1, BYTEALTO PANTALLA 
+					MOVL R1, BYTEBAJO PANTALLA
+					
+					MOVH R2, 00h
+					MOVL R2, 119
+					
+					ADD R1, R1, R2
+					
+					MOVH R0, 00000111b
+					MOV [R1], R0
+				
+		
+		RET
+			
+	; CALCULAR HIT
+	
+	consultar_hit:
+		MOVH R0, BYTEALTO DIRECCION coordenada_x
+		MOVL R0, BYTEBAJO DIRECCION coordenada_x ; X = numeros
+		MOV R0, [R0]
+		
+		MOVH R1, BYTEALTO DIRECCION coordenada_y
+		MOVL R1, BYTEBAJO DIRECCION coordenada_y ; Y = lletres
+		MOV R1, [R1]
+		
+		MOVH R2, 00h								; ASCII per passar lletres ---> num
+		MOVL R2, 96
 		
 		MOVH R6, 00h
-		MOVL R6, 9
+		MOVL R6, 48
+		
+		SUB R0, R0, R6 ; VALOR NUMERO (R0)
+
+		MOVH R5, 00h								; Valor salt 1 linia
+		MOVL R5, 15
+		
+		; POSICIÓ COLUMNA
+		
+		MOVH R3, BYTEALTO PANTALLA					; Primera pos pantalla
+		MOVL R3, BYTEBAJO PANTALLA
+		
+		MOVH R4, 00h
+		MOVL R4, 3
+		
+		ADD R3, R3, R4								; Posicio sobre lletra a interficie
+		
+		ADD R3, R3, R0								; R3 ---> Pos columna a la fila 1
+		
+		; Lletra ---> numero
+		
+		SUB R4, R1, R2								; R4 ---> valor numeric de la Lletra (a = 1, b = 2, c = 3, ...)
+		
+		; Posicio fila
+		XOR R6, R6, R6
+		MOV R2, R4 ; VALOR LLETRA (R2)
+		mul:
+			ADD R6, R6, R5							; R5 ---> salts de linia a fer
+			DEC R4
+			BRNZ mul
+			
+		ADD R3, R3, R6
+		
+		; Posicio tauler vectors
+		MOVH R1, 00h
+		MOVL R1, 1
+		
+		MOVH R5, 00h	; Salt de fila tauler
+		MOVL R5, 6
+		
+		XOR R6, R6, R6
+		
+		SUB R4, R4, R5 ; R4 te un valor inicial de 0, es pot veure al bucle mul
+		
+		ADD R4, R4, R0
+		
+		mul_vec:
+			ADD R6, R6, R5
+			DEC R2
+			BRNZ mul_vec
+		
+		ADD R4, R4, R6
+		SUB R4, R4, R1
+		
+		;MOVH R3, BYTEALTO PANTALLA					; Primera pos pantalla
+		;MOVL R3, BYTEBAJO PANTALLA
+		;ADD R3,R0, R3 ; ARREGLAR AIXO
+
+		
+	
+		MOVH R0, BYTEALTO DIRECCION fila_a
+		MOVL R0, BYTEBAJO DIRECCION fila_a
+		ADD R0, R0, R4
+		MOV R0, [R0]
+		
+		MOVH R1, 00h
+		MOVL R1, 1
+
+		COMP R0,R1
+		BRZ tocat
+		MOVH R1,00100000b
+		MOVL R1, ' '
+		JMP imprimir_resultat
+		tocat:
+			MOVH R1, 00010000b
+			MOVL R1, ' '
+			; Suma 1 al detectar barcos
+			MOVH R5, BYTEALTO DIRECCION contador_barcos
+			MOVL R5, BYTEBAJO DIRECCION contador_barcos
+			
+			MOV R6, [R5]
+			INC R6
+			MOV [R5], R6
+			
+		imprimir_resultat:
+			MOV [R3], R1
+			MOVH R2, BYTEALTO DIRECCION marcador_intents
+			MOVL R2, BYTEBAJO DIRECCION marcador_intents
+			MOV R4, [R2]
+			INC R4
+			MOV [R2], R4
 		
 		
 		
+	comprovar_final:
+		;Mira si el jugador ha arribat als 6 baruitos eliminats
+		MOVH R3, BYTEALTO DIRECCION contador_barcos
+		MOVL R3, BYTEBAJO DIRECCION contador_barcos
+		MOV R4, [R3]
+		MOVH R2, 00h
+		MOVL R2, 6
+		COMP R4, R2
+		BRZ win
+		;Sino torna al lloc 
+	
+		MOVH R0, BYTEALTO DIRECCION torn_jugador
+		MOVL R0, BYTEBAJO DIRECCION torn_jugador
+		CALL R0
 		
-		imprimir_tablero:
+		win:
+			MOVH R0, BYTEALTO PANTALLA
+			MOVL R0, BYTEBAJO PANTALLA
+		
 			MOVH R2, 00h
-			MOVL R2, 6
+			MOVL R2, 120
 			
-			
-			MOVH R5, 00h
-			MOVL R5, 1
-			; Memoreis dispinibles, R5, R7
-			
-			
-			canvi_color:
-				MOVH R4, 00001000b
-				;ADD R7, R7, R5
-				XOR R7,R7,R7
-				JMP imprimir
-				
-			imprimir_fila:
+			MOVH R3, BYTEALTO DIRECCION text_win_1
+			MOVL R3, BYTEBAJO DIRECCION text_win_1
+		
+			imprimir_titol_win:
 				MOV R4, [R3]
 				MOVH R4, 00111000b
-				COMP R7, R5
-				BRZ canvi_color
-				ADD R7,R7,R5
-				JMP imprimir
-				imprimir:
-					MOV [R0], R4 ; Mou a  la pantalla
-					INC R0
-					DEC R2
-					BRNZ imprimir_fila
-
-
-			ADD R0, R0, R6
+				MOV [R0], R4
+				INC R0
+				INC R3
+				DEC R2
+				BRNZ imprimir_titol_win
+				
+			imprimir_intents:
+	
+				MOVH R1, BYTEALTO PANTALLA 
+				MOVL R1, BYTEBAJO PANTALLA
+				
+				MOVH R0, BYTEALTO DIRECCION marcador_intents
+				MOVL R0, BYTEBAJO DIRECCION marcador_intents
+				
+				; Falta fer que imprimeixi amb coduuigo ASCII
+				
+				;MOVL R3, '6'
+				
+				
+				
+				
+				MOV R3, R0
+				
+				;El valor de R0 tiene el valor 6 en numero pero necesito pasarlo a CODIGO ASCII para printearlo
+				MOVH R2, 00h
+				MOVL R2, 86
+				MOVH R4, 00h
+				MOVL R4, 48
+				ADD R1, R1, R2
+				ADD R3, R3, R4
+				
+				MOVH R3, 00111000b
+				MOV [R1], R3
 			
-			DEC R1
-			BRNZ imprimir_tablero
-			
-			
-		
-		
-	JMP final
-		
-
-
 final:
+	; Ficar que s'apaga la pantalla
 	FIN
