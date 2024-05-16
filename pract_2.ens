@@ -598,13 +598,15 @@ ini: ;programa principal
 				
 				
 				
-				MOV R3, R0
+				MOV R3, [R0]
 				
 				;El valor de R0 tiene el valor 6 en numero pero necesito pasarlo a CODIGO ASCII para printearlo
 				MOVH R2, 00h
 				MOVL R2, 86
+				
 				MOVH R4, 00h
 				MOVL R4, 48
+				
 				ADD R1, R1, R2
 				ADD R3, R3, R4
 				
