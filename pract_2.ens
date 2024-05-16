@@ -10,9 +10,8 @@
 ;---------------------------------------
 
 ; Inicialitzem el teclat i la pantalla a les seves dirrecion
-TECLAT EQU 0E00h
-PANTALLA EQU 0F00h
-
+TECLAT EQU 0E000h
+PANTALLA EQU 0F000h
 ; Definim el origen de memoria del programa
 ORIGEN 010h
 
@@ -27,6 +26,25 @@ INICIO ini
 	text_splash_6 VALOR "Guillermo Esq. "
 	text_splash_7 VALOR "---------------"
 	text_splash_8 VALOR "PRESS SPACE NOW"
+	
+	; Graella del joc
+	text_graella_1 VALOR "    123456     "
+	text_graella_2 VALOR "   a           "
+	text_graella_3 VALOR "   b           "
+	text_graella_4 VALOR "   c           "
+	text_graella_5 VALOR "   d           "
+	text_graella_6 VALOR "   e           "
+	text_graella_7 VALOR "   f        L= "
+	text_graella_8 VALOR "            N= "
+	; Graella del tauler
+	text_tauler_1 VALOR  "               "
+	;text_tauler_2 VALOR "      "
+	;text_tauler_3 VALOR "      "
+	;text_tauler_4 VALOR "      "
+	;text_tauler_5 VALOR "      "
+	;text_tauler_6 VALOR "      "
+	
+	
 
 	
 	
@@ -140,7 +158,8 @@ ini: ;programa principal
 			COMP R2, R1
 			
 			BRNZ consultar_estat
-			
+		
+	RET
 	; Funcio esperar espai
 	esperant_espai:
 		
@@ -170,43 +189,62 @@ ini: ;programa principal
 		MOVL R0, BYTEBAJO PANTALLA
 		
 		MOVH R2, 00h
-		MOVL R2, 15
+		MOVL R2, 120
 		
-		MOVH R3, BYTEALTO DIRECCION graella_horitzontal
-		MOVL R3, BYTEBAJO DIRECCION graella_horitzontal
+		MOVH R3, BYTEALTO DIRECCION text_graella_1
+		MOVL R3, BYTEBAJO DIRECCION text_graella_1
 		
-		imprimir_graella_horitzontal:
+		imprimir_titol2:
 			MOV R4, [R3]
-			MOVH R4, 00110000b
+			MOVH R4, 00000111b
 			MOV [R0], R4
 			INC R0
 			INC R3
 			DEC R2
-			BRNZ imprimir_graella_horitzontal
+			BRNZ imprimir_titol2
 			
 		MOVH R0, BYTEALTO PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
 		
-		MOVH R2, 00h
-		MOVL R2, 8
+		MOVH R5, 00h
+		MOVL R5, 19
 		
-		MOVH R3, BYTEALTO DIRECCION graella_vertical
-		MOVL R3, BYTEBAJO DIRECCION graella_vertical
-		imprimir_graella_vertical:
-			MOV R4, [R3]
-			MOVH R4, 00110000b
-			MOV [R0], R4
-			ADD R0, R0, R1
-			INC R0
-			INC R3
-			DEC R2
-			BRNZ imprimir_graella_vertical
-		RET
+		ADD R0, R0, R5 ; La patnalla comença a la posicio 19
+	
+		MOVH R3, BYTEALTO DIRECCION text_tauler_1
+		MOVL R3, BYTEBAJO DIRECCION text_tauler_1
 		
-	
-	
+		
+		MOVH R1, 00h
+		MOVL R1, 6
+		
+		MOVH R6, 00h
+		MOVL R6, 9
+		
+		
+		
+		imprimir_tablero:
+			MOVH R2, 00h
+			MOVL R2, 6
+			
+		
+			imprimir_fila:
+				MOV R4, [R3]
+				MOVH R4, 00001000b
+				MOV [R0], R4 ; Mou a  la pantalla
+				INC R0
+				DEC R2
+				BRNZ imprimir_fila
+
+			ADD R0, R0, R6
+			
+			DEC R1
+			BRNZ imprimir_tablero
+			
+			
+		
+		
 	JMP final
-	RET
 		
 
 

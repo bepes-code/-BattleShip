@@ -1,38 +1,223 @@
-PANTALLA EQU 0B000h
-ORIGEN 400h
-INICIO ini
-.CODIGO
+; ---------------------------------------------------------------
+; Nom alumne 1: Aleix Rosinach
+; Nom alumne 2: Guillermo Esquinas
+; Grup: 4t
+; Sessió: PR-PRA2
+; --------------------------------------------------------------- 
 
-ini:
-	MOVH R0, BYTEALTO PANTALLA
-	MOVL R0, BYTEBAJO PANTALLA
+;---------------------------------------
+;| BATELSHIP GAME BY ALEIX & GUILLERMO |
+;---------------------------------------
+
+; Inicialitzem el teclat i la pantalla a les seves dirrecion
+TECLAT EQU 0E000h
+PANTALLA EQU 0F000h
+
+; Definim el origen de memoria del programa
+ORIGEN 010h
+
+INICIO ini
+.DATOS
+	; Display de la pantalla de inici 
+	text_splash_1 VALOR "---------------"
+	text_splash_2 VALOR "BATELSHIP  GAME"
+	text_splash_3 VALOR "       BY      "
+	text_splash_4 VALOR "Aleix  Rosinach"
+	text_splash_5 VALOR "       &       "
+	text_splash_6 VALOR "Guillermo Esq. "
+	text_splash_7 VALOR "---------------"
+	text_splash_8 VALOR "PRESS SPACE NOW"
 	
-	; activar pantalla 00000010
-	; borrar pantalla  00000001
-	; accedir al registre de control
-	; 00000000 00000011
+	; Graella del joc
+	text_graella_1 VALOR "    123456     "
+	text_graella_2 VALOR "   a           "
+	text_graella_3 VALOR "   b           "
+	text_graella_4 VALOR "   c           "
+	text_graella_5 VALOR "   d           "
+	text_graella_6 VALOR "   e           "
+	text_graella_7 VALOR "   f        L= "
+	text_graella_8 VALOR "            N= "
+	; Graella del tauler
+	text_tauler_1 VALOR "      "
+	text_tauler_2 VALOR "      "
+	text_tauler_3 VALOR "      "
+	text_tauler_4 VALOR "      "
+	text_tauler_5 VALOR "      "
+	text_tauler_6 VALOR "      "
 	
-	; registre control = BASE + 120 = R0 + 120
-	MOVH R1, 00h
-	MOVL R1, 120
-	ADD R1, R0, R1	; R1 = BASE + 120 => registre control
 	
-	MOVH R2, 00h
-	MOVL R2, 00000011b	; MOVL R2, 03h
-	MOV [R1], R2
+
 	
-	; escriure una lletra
-	; registre = 00FFFCCC LLLLLLLL
-	; high = 00 fons caracter
-	; low  = caracter
-	MOVH R2, 00000111b	; NEGRE-BLANC
-	MOVL R2, 48h	; lletra H
-	MOV [R0], R2
 	
-	INC R0 ; Canviem de posicio de pantalla
-	MOVH R2, 00111000b	
-	MOVL R2, 4Fh	; lletra O
-	MOV [R0], R2
+	;Vectors per imprimir la graella del joc
+	graella_horitzontal VALOR " ABCDEFGHIJ    "
+	graella_vertical VALOR " 123456 "
 	
-	jmp -1
-FIN
+	;Vector per demanar les cordenades del jugador
+	text_coor VALOR "ENTRA CORD:"
+	
+	; Informacio durant el joc
+	intents VALOR 0
+	
+	;Vectir per a desar les coordenades introduir per teclat 
+	cordenada_x VALOR 0
+	cordenada_y VALOR 0
+	
+	
+	;Vectors per a vitoria i derrota
+	text_win VALOR ".--------------------.| YOU WIN | .---------------."
+	text_loose VALOR ".--------------------.| YOU LOOSE | .---------------."
+	
+
+	;Disposició dels barcos
+				;A B C D E F
+	fila_a VALOR 1,1,1,0,0,0
+	fila_b VALOR 0,0,0,0,0,1
+	fila_c VALOR 1,0,1,1,0,0
+	fila_d VALOR 1,0,0,0,0,0
+	fila_e VALOR 0,0,0,0,0,1
+	fila_f VALOR 0,0,0,1,0,0 
+
+.CODIGO
+ini: ;programa principal
+	; Iniciem el programa netejant tota la pantalla
+	MOVH R0, BYTEALTO DIRECCION netejar_pantalla
+	MOVL R0, BYTEBAJO DIRECCION netejar_pantalla
+	CALL R0
+	
+	; Mostrem pantalla de inici del joc
+	MOVH R0, BYTEALTO DIRECCION splash
+	MOVL R0, BYTEBAJO DIRECCION splash
+	CALL R0
+	
+	; Escoltem el teclat fins que es premi la tecla espai
+	
+	MOVH R0, BYTEALTO DIRECCION esperant_espai
+	MOVL R0, BYTEBAJO DIRECCION esperant_espai
+	CALL R0
+	
+	; ---------- EL JOC S'HA INCIAT --------------
+	; Netejem pantalla
+	MOVH R0, BYTEALTO DIRECCION netejar_pantalla
+	MOVL R0, BYTEBAJO DIRECCION netejar_pantalla
+	
+	; imprimir graella per començar el joc
+	MOVH R0, BYTEALTO DIRECCION imprimir_graella
+	MOVL R0, BYTEBAJO DIRECCION imprimir_graella
+	CALL R0
+	; Aqui comencaria la logica del joc
+	
+	
+	
+	; Funcio netejar pantalla 
+	netejar_pantalla:
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA
+		MOVH R1, 10h
+		MOVL R1, 120
+		ADD R0, R0, R1
+		
+		MOVH R1, 00h
+		MOVL R1, 11b
+		MOV [R0], R1
+		RET
+		
+	; Funció splash
+	splash:
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA
+		
+		MOVH R2, 00h
+		MOVL R2, 120
+		
+		MOVH R3, BYTEALTO DIRECCION text_splash_1
+		MOVL R3, BYTEBAJO DIRECCION text_splash_1
+		
+		imprimir_titol:
+			MOV R4, [R3]
+			MOVH R4, 00110000b
+			MOV [R0], R4
+			INC R0
+			INC R3
+			DEC R2
+			BRNZ imprimir_titol
+		RET
+	; Funcio que consula el estat del tectlat
+	consulta_estat_teclat:
+		MOVH R0, BYTEALTO TECLAT 
+		MOVL R0, BYTEBAJO TECLAT
+		
+		INC R0
+		
+		MOVH R1, 00000001b
+		MOVL R1, 00h
+		
+		consultar_estat:
+			
+			MOV R2, [R0]
+			
+			COMP R2, R1
+			
+			BRNZ consultar_estat
+		
+	RET
+	; Funcio esperar espai
+	esperant_espai:
+		
+		MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
+		MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
+		CALL R0
+		
+		; Si estem aqui vol dir que s'ha premut añlguna tecla al teclat, ara mirarem quina
+		
+		MOVH R0, BYTEALTO TECLAT
+		MOVl R0, BYTEBAJO TECLAT
+		
+		MOV R1, [R0]
+		
+		; Espai en codi ASCCI
+		MOVH R0, 32h
+		MOVL R0, 20h
+		
+		; Comparem si el resultat es igual
+		COMP R1, R0
+		BRNZ esperant_espai
+		
+		RET
+		
+	imprimir_graella:
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA
+		
+		MOVH R2, 00h
+		MOVL R2, 120
+		
+		MOVH R3, BYTEALTO DIRECCION text_graella_1
+		MOVL R3, BYTEBAJO DIRECCION text_graella_1
+		
+		imprimir_titol2:
+			MOV R4, [R3]
+			MOVH R4, 00000111b
+			MOV [R0], R4
+			INC R0
+			INC R3
+			DEC R2
+			BRNZ imprimir_titol2
+		imprimir_tauler:
+			MOVH R2, 00h
+			MOVL R2, 36
+			MOVH R3, BYTEALTO DIRECCION text_tauler_1
+			MOVL R3, BYTEBAJO DIRECCION text_tauler_1
+			
+			
+
+		RET
+
+	
+	JMP final
+	RET
+		
+
+
+final:
+	FIN
