@@ -1,3 +1,11 @@
+; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador ; Guardaro com a teext i printejaro, com la corenada X
+; Falta comentar la part de (consulta_estat_teclat) linea 203, que no e entes gaire
+; Implementar els colors amb variables de memoria
+; Revisar comentaris imprimri tauler blanc-blau, LNEA 247
+; Repasar rapid comentaris que no m'hagia colat
+; Coimentar la part de mutiplicaicons i calculs que vas fer a consultar_hit
+
+
 ; ---------------------------------------------------------------
 ; Nom alumne 1: Aleix Rosinach
 ; Nom alumne 2: Guillermo Esquinas
@@ -63,7 +71,7 @@ INICIO ini
 	
 	contador_barcos VALOR 0000h   ; Contador de barcos endevinats
 	
-	
+
 	marcador_intents VALOR 0000h  ; Contador de intents
 	
 	
@@ -111,7 +119,8 @@ ini: ;programa principal
 	CALL R0
 	
 	
-	; ---------- EL JOC S'HA INCIAT --------------
+	; ---------- EL JOC S'HA INCIAT (ja que s'ha pitjat espai)--------------
+	
 	; Netejem pantalla
 	MOVH R0, BYTEALTO DIRECCION netejar_pantalla
 	MOVL R0, BYTEBAJO DIRECCION netejar_pantalla
@@ -155,7 +164,7 @@ ini: ;programa principal
 	
 	; Funcio netejar pantalla 
 	netejar_pantalla:
-		MOVH R0, BYTEALTO PANTALLA
+		MOVH R0, BYTEALTO PANTALLA ; Cridem a R0 la primera posicio de pantalla
 		MOVL R0, BYTEBAJO PANTALLA
 		MOVH R1, 10h
 		MOVL R1, 120
@@ -167,8 +176,9 @@ ini: ;programa principal
 		
 		RET
 	
-	; Funció splash
+	; Funció splash (printejar la pantalla de carga)
 	splash:
+		; Cridem a R0 la primera posicio de pantalla
 		MOVH R0, BYTEALTO PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
 		
@@ -176,16 +186,17 @@ ini: ;programa principal
 		MOVH R2, 00h
 		MOVL R2, 120 
 		
+		; Guardem a R3 la posicio de text_splash
 		MOVH R3, BYTEALTO DIRECCION text_splash_1
 		MOVL R3, BYTEBAJO DIRECCION text_splash_1
 		
 		imprimir_titol:
-			MOV R4, [R3]
+			MOV R4, [R3]	; Guardem a R4, el valor que conte la posicio de splash, el primer valor serà ---------------
 			MOVH R4, 00111000b ; Definim el color de fons de color blanc i el text negre
-			MOV [R0], R4
+			MOV [R0], R4 ; Movem a la panatalla el valor que volem imprimir
 			INC R0
-			INC R3
-			DEC R2
+			INC R3 ; Incrementem R3, per a reccorre tota la pantalla
+			DEC R2 ; Decrementem el contador de posicions
 			BRNZ imprimir_titol
 		RET
 		
@@ -195,16 +206,16 @@ ini: ;programa principal
 		MOVH R0, BYTEALTO TECLAT 
 		MOVL R0, BYTEBAJO TECLAT
 		
-		INC R0
+		INC R0 ; 
 		
-		MOVH R1, 00000001b
+		MOVH R1, 00000001b ; 
 		MOVL R1, 00h
 		
 		consultar_estat:
 			
 			MOV R2, [R0]
 			
-			COMP R2, R1
+			COMP R2, R1 ; esperm a que tingui algun valor el buffer
 			
 			BRNZ consultar_estat
 		
@@ -213,11 +224,12 @@ ini: ;programa principal
 	; Funcio esperar espai
 	esperant_espai:
 		
+		;Consultem buffer del teclat
 		MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
 		MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
 		CALL R0
 		
-		; Si estem aqui vol dir que s'ha premut añlguna tecla al teclat, ara mirarem quina
+		; Si estem aqui vol dir que s'ha pitjat alguna  tecla al teclat, ara mirarem quina
 		
 		MOVH R0, BYTEALTO TECLAT
 		MOVl R0, BYTEBAJO TECLAT
@@ -228,25 +240,29 @@ ini: ;programa principal
 		MOVH R0, 32h
 		MOVL R0, 20h
 		
-		; Comparem si el resultat es igual
+		; Comparem si el resultat es igual (si el valor del buffer del teclat es igual a R0, que conte el valor de l'espai)
 		COMP R1, R0
 		BRNZ esperant_espai
 		
 	RET
 		
 	imprimir_graella:
+		; Guardem la primera posicio de la pantalla
 		MOVH R0, BYTEALTO PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
 		
+		; Guardem les totes les posicions que te la pantalla
 		MOVH R2, 00h
 		MOVL R2, 120
 		
+		; Guardem la primera posicio del text de la graella
 		MOVH R3, BYTEALTO DIRECCION text_graella_1
 		MOVL R3, BYTEBAJO DIRECCION text_graella_1
 		
+		; Imprimim la Graella
 		imprimir_fons_graella:
 			MOV R4, [R3]
-			MOVH R4, 00000111b
+			MOVH R4, 00000111b ; Definim el color, fons negre i text blanc
 			MOV [R0], R4
 			INC R0
 			INC R3
@@ -255,70 +271,71 @@ ini: ;programa principal
 		
 	
 		
-	; Imprimir tauler
-	MOVH R0, BYTEALTO PANTALLA
-	MOVL R0, BYTEBAJO PANTALLA
-	
-	MOVH R1, 00h							  ; R1 ---> "Salt" posicions fins primera pos tauler
-	MOVL R1, 19
-	
-	MOVH R5, 00h							  ; R5 ---> posicio proxima fila
-	MOVL R5, 9
-	
-	ADD R0, R0, R1 							  ; R0 ---> Pimera posicio tauler
-	
-	MOVH R1, 00h 							  ; R1 ---> Iterador files
-	MOVL R1, 6
-	
-	MOVH R3, BYTEALTO DIRECCION text_tauler_1 ; R3 ---> que ha d'escriure a cada fila
-	MOVL R3, BYTEBAJO DIRECCION text_tauler_1
-	
-	MOV R4, [R3]							  ; R4 ---> " "
-	
-	imprimir_files:
-		MOVH R2, 00h 							  ; R1 ---> Iterador imprimir_fila
-		MOVL R2, 6
+		; Imprimir tauler de joc (blanc i blau)
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA
 		
-		imprimir_fila_1:			; BLANC -- BLAU -- BLANC -- BLAU -- BLANC -- BLAU
-			MOVH R4, 00111111b		; Color blanc
-			MOV [R0], R4
-			INC R0
-			DEC R2
+		MOVH R1, 00h							  ; R1 ---> "Salt" posicions fins primera pos tauler
+		MOVL R1, 19
+		
+		MOVH R5, 00h							  ; R5 ---> posicio proxima fila
+		MOVL R5, 9
+		
+		ADD R0, R0, R1 							  ; R0 ---> Pimera posicio tauler
+		
+		MOVH R1, 00h 							  ; R1 ---> Iterador files
+		MOVL R1, 6
+		
+		MOVH R3, BYTEALTO DIRECCION text_tauler_1 ; R3 ---> que ha d'escriure a cada fila
+		MOVL R3, BYTEBAJO DIRECCION text_tauler_1
+		
+		MOV R4, [R3]							  ; R4 ---> " "
+		
+		imprimir_files:
+			MOVH R2, 00h 							  ; R1 ---> Iterador imprimir_fila
+			MOVL R2, 6
 			
-			MOVH R4, 00001001b		; Color blau
-			MOV [R0], R4
-			INC R0
-			DEC R2
-			BRNZ imprimir_fila_1
-		
-		MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
-		MOVL R2, 6
-		
-		DEC R1
-		
-		ADD R0, R0, R5				; Passa a la posició fila seg
-		
-		imprimir_fila_2:			; BLAU -- BLANC -- BLAU -- BLANC -- BLAU -- BLANC
-			MOVH R4, 00001001b		; Color blau
-			MOV [R0], R4
-			INC R0
-			DEC R2
+			imprimir_fila_1:			; BLANC -- BLAU -- BLANC -- BLAU -- BLANC -- BLAU
+				MOVH R4, 00111111b		; Color blanc
+				MOV [R0], R4
+				INC R0					; Incrementem posicio pantalla
+				DEC R2					; Decremento contador de posicio de la fila
+				
+				MOVH R4, 00001001b		; Color blau
+				MOV [R0], R4
+				INC R0                  ; Incrementem posicio pantalla
+				DEC R2					; Decremento contador de posicio de la fila
+				BRNZ imprimir_fila_1
+				
 			
-			MOVH R4, 00111111b		; Color blanc
-			MOV [R0], R4
-			INC R0
-			DEC R2
-			BRNZ imprimir_fila_2
+			MOVH R2, 00h 				; R1 ---> Resetejo contador de columnes
+			MOVL R2, 6
 			
-		MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
-		MOVL R2, 6
-		
-		ADD R0, R0, R5				; Passa a la posició fila seg
-		
-		DEC R1
-		
-		BRNZ imprimir_files
-	RET
+			DEC R1						; Recremento contador de fila
+			
+			ADD R0, R0, R5				; Passa a la posició fila seg
+			
+			imprimir_fila_2:			; BLAU -- BLANC -- BLAU -- BLANC -- BLAU -- BLANC
+				MOVH R4, 00001001b		; Color blau
+				MOV [R0], R4
+				INC R0
+				DEC R2
+				
+				MOVH R4, 00111111b		; Color blanc
+				MOV [R0], R4
+				INC R0
+				DEC R2
+				BRNZ imprimir_fila_2
+				
+			MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
+			MOVL R2, 6
+			
+			ADD R0, R0, R5				; Passa a la posició fila seg
+			
+			DEC R1
+			
+			BRNZ imprimir_files
+		RET
 	
 	; DEMANAR COORDENADES 
 	
@@ -329,7 +346,7 @@ ini: ;programa principal
 		MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
 		
 		CALL R0
-		; Comprobar coordenades
+	
 		
 		MOVH R0, BYTEALTO TECLAT
 		MOVL R0, BYTEBAJO TECLAT
@@ -337,11 +354,12 @@ ini: ;programa principal
 		MOV R1,[R0]
 		MOVH R1,00h
 		
+		; Anirem fent comparacions si el valor del buffer es igual a algun dels valors que acceptem en aquest cas les lletres a,b,c,d,e,f
 		MOVH R0, 00h
 		MOVL R0, 'a'
 		
 		COMP R1, R0
-		BRZ coordenada_y_valida
+		BRZ coordenada_y_valida ; Si es correcta saltarem a cordenada_y_valida
 		
 		MOVL R0, 'b'
 		COMP R1, R0
@@ -363,26 +381,31 @@ ini: ;programa principal
 		COMP R1, R0
 		BRZ coordenada_y_valida
 		
-		JMP esperant_coordenades_jugador
+		JMP esperant_coordenades_jugador ; Si no ha trobat cap lletra correca tornem a fer el bucle fins a que introdueixin una lletra correcta
 		
+		
+		; Si entrem vol dir que una lletra es correcta
 		coordenada_y_valida:
 			MOVH R1, BYTEALTO DIRECCION coordenada_y
 			MOVL R1, BYTEBAJO DIRECCION coordenada_y
 			
-			MOV [R1], R0
+			MOV [R1], R0 ; Guardem la lletra a coordenada_y
 			
 			MOVH R1, BYTEALTO PANTALLA 
 			MOVL R1, BYTEBAJO PANTALLA
 			
 			MOVH R2, 00h
-			MOVL R2, 104
+			MOVL R2, 104	; Definim la posicio que ficarem la lletra a la pantalla
 			
 			ADD R1, R1, R2
 			
 			MOVH R0, 00000111b
-			MOV [R1], R0
+			MOV [R1], R0 ; Imprimir la lletra a la pantalla
+		
+		; Un cop la cordenada y esta introduida mirem la X
 		
 		esperant_cordenada_x:
+			; Esperem al buffer del teclat
 			MOVH R0, BYTEALTO DIRECCION consulta_estat_teclat
 			MOVL R0, BYTEBAJO DIRECCION consulta_estat_teclat
 			CALL R0
@@ -392,7 +415,7 @@ ini: ;programa principal
 				MOVL R0, BYTEBAJO TECLAT
 				MOV R1,[R0]
 				MOVH R1,00h
-				
+				; Tornem a fer el mateix procediment que amb les lletrs, anirem comparan si el buffer es igual a algun dels numeros correctes que tenim definits
 				MOVH R0, 00h
 				MOVL R0, '1'
 				COMP R1,R0
@@ -420,22 +443,23 @@ ini: ;programa principal
 
 				JMP esperant_cordenada_x
 				
+				; Salta a cordenada_x_valida si algun compare ha sigut valid
 				coordenada_x_valida:
 					MOVH R1, BYTEALTO DIRECCION coordenada_x
 					MOVL R1, BYTEBAJO DIRECCION coordenada_x
 					
-					MOV [R1], R0
+					MOV [R1], R0 ; Guardem el numero correcte a coordenada_x
 					
 					MOVH R1, BYTEALTO PANTALLA 
 					MOVL R1, BYTEBAJO PANTALLA
 					
 					MOVH R2, 00h
-					MOVL R2, 119
+					MOVL R2, 119 ; Definexo la posicio de pantalla a la que printejare el nuemro
 					
 					ADD R1, R1, R2
 					
-					MOVH R0, 00000111b
-					MOV [R1], R0
+					MOVH R0, 00000111b 
+					MOV [R1], R0 ; Imprimeixo el numero a la pantalla,amb el format definit a R0
 				
 		
 		RET
@@ -445,16 +469,16 @@ ini: ;programa principal
 	consultar_hit:
 		MOVH R0, BYTEALTO DIRECCION coordenada_x
 		MOVL R0, BYTEBAJO DIRECCION coordenada_x ; X = numeros
-		MOV R0, [R0]
+		MOV R0, [R0] ; Llegeixo el valor de X
 		
 		MOVH R1, BYTEALTO DIRECCION coordenada_y
 		MOVL R1, BYTEBAJO DIRECCION coordenada_y ; Y = lletres
-		MOV R1, [R1]
+		MOV R1, [R1] ; Llegeixo el valor de Y
 		
 		MOVH R2, 00h								; ASCII per passar lletres ---> num
 		MOVL R2, 96
 		
-		MOVH R6, 00h
+		MOVH R6, 00h								; ASCII per passar numeros escrits ---> num
 		MOVL R6, 48
 		
 		SUB R0, R0, R6 ; VALOR NUMERO (R0)
@@ -509,109 +533,132 @@ ini: ;programa principal
 		ADD R4, R4, R6
 		SUB R4, R4, R1
 		
-		;MOVH R3, BYTEALTO PANTALLA					; Primera pos pantalla
-		;MOVL R3, BYTEBAJO PANTALLA
-		;ADD R3,R0, R3 ; ARREGLAR AIXO
-
-		
 	
 		MOVH R0, BYTEALTO DIRECCION fila_a
 		MOVL R0, BYTEBAJO DIRECCION fila_a
 		ADD R0, R0, R4
 		MOV R0, [R0]
 		
+
+		
+		MOV R4, [R3] ; Guardem a R4, la informacio de pantalla de la posicio que indica el jugador
+		MOVH R2, 00010000b
+		MOVL R2, ' '
+		COMP R4, R2	; Mirem si la posicio es verda, aixo voldra dir que ja havia endivinat aquesta casella
+		BRZ barco_endivinat_anteriorment; Si es verda saltem a barco_endivinat_anteriorment
+		
+		; Guardem el valor de 1
 		MOVH R1, 00h
 		MOVL R1, 1
-
-		COMP R0,R1
-		BRZ tocat
+		
+		
+		COMP R0,R1 ; Comparem si la posicio indicada es un 1 o un 0 [Barco endivinat o no]
+		BRZ tocat ; En el cas de que si sigui 1 saltem a tocat
+		
+		; En cas de que no, definim el color vermell
 		MOVH R1,00100000b
 		MOVL R1, ' '
-		JMP imprimir_resultat
+		JMP imprimir_resultat ; Saltem a imprimir resultat
+		
+		
 		tocat:
-			MOVH R1, 00010000b
+			MOVH R1, 00010000b ; Definim el format de color verd
 			MOVL R1, ' '
-			; Suma 1 al detectar barcos
+			
+			; Suma 1 contador de barcos
 			MOVH R5, BYTEALTO DIRECCION contador_barcos
 			MOVL R5, BYTEBAJO DIRECCION contador_barcos
 			
 			MOV R6, [R5]
 			INC R6
-			MOV [R5], R6
+			MOV [R5], R6 ;Guarda el valor +1 a el contador de barcos
+			JMP imprimir_resultat ; Salta a imprir reesultat amb el color verd definit a R1
+			
+		barco_endivinat_anteriorment:
+			; Si el barco ja ha estat endivinat, no sumem +1 al contador pero definim el color verd per a que pinti a damunt
+			MOVH R1, 00010000b ; Color verd
+			MOVL R1, ' '
+			JMP imprimir_resultat ; Saltem a imprimir_resultat
 			
 		imprimir_resultat:
-			MOV [R3], R1
+			MOV [R3], R1 ; Imprimir el color que toqui a la casella, vermell si ha sigut incorrecte, o verd en els cassos de que un barco sigui encertat, o ja hagi sigut encertat anteriorment
 			MOVH R2, BYTEALTO DIRECCION marcador_intents
 			MOVL R2, BYTEBAJO DIRECCION marcador_intents
 			MOV R4, [R2]
 			INC R4
-			MOV [R2], R4
+			MOV [R2], R4 ; Sumem 1 al contador de intents
 		
 		
 		
 	comprovar_final:
-		;Mira si el jugador ha arribat als 6 baruitos eliminats
+		;Mira si el jugador ha arribat als 6 barcos eliminats
 		MOVH R3, BYTEALTO DIRECCION contador_barcos
 		MOVL R3, BYTEBAJO DIRECCION contador_barcos
 		MOV R4, [R3]
+		
 		MOVH R2, 00h
-		MOVL R2, 6
-		COMP R4, R2
-		BRZ win
-		;Sino torna al lloc 
+		MOVL R2, 10  ; 10 barcos en total
+		
+		COMP R4, R2 ; Comparem si el cotnador de barcos eliminats es 10 (el qual significara que ha endivinat els barcos)
+		BRZ win ; En el cas de que la comparacio sigui correcta saltem a win
+		
+		
+		
+		;En cas de que no hagi guanyat seguim el joc
 	
 		MOVH R0, BYTEALTO DIRECCION torn_jugador
 		MOVL R0, BYTEBAJO DIRECCION torn_jugador
 		CALL R0
 		
 		win:
+			; En el cas de que hagi guanyat imprimir la pantalla de victoria
+			; Definim posicio de pantalla
 			MOVH R0, BYTEALTO PANTALLA
 			MOVL R0, BYTEBAJO PANTALLA
 		
+			; Definim posicions de la pantalla totals
 			MOVH R2, 00h
 			MOVL R2, 120
 			
+			
+			;Guardem el valor de la posico de text_win_1
 			MOVH R3, BYTEALTO DIRECCION text_win_1
 			MOVL R3, BYTEBAJO DIRECCION text_win_1
 		
 			imprimir_titol_win:
 				MOV R4, [R3]
 				MOVH R4, 00111000b
-				MOV [R0], R4
+				MOV [R0], R4 ; Imprimir el text pretinent, amb fondo blanc i text negre
 				INC R0
 				INC R3
 				DEC R2
 				BRNZ imprimir_titol_win
 				
 			imprimir_intents:
-	
+				; I finalment imprimir el numero final de intents
 				MOVH R1, BYTEALTO PANTALLA 
 				MOVL R1, BYTEBAJO PANTALLA
 				
 				MOVH R0, BYTEALTO DIRECCION marcador_intents
 				MOVL R0, BYTEBAJO DIRECCION marcador_intents
 				
-				; Falta fer que imprimeixi amb coduuigo ASCII
+				;El valor de R0 tiene el valor de nummero de intents en numero hexadeciaml pero necesito pasarlo a CODIGO ASCII para printearlo
 				
-				;MOVL R3, '6'
+				; Definixo la posicio de la pantalla on vuy printejar el resultat
 				
-				
-				
-				
-				MOV R3, [R0]
-				
-				;El valor de R0 tiene el valor 6 en numero pero necesito pasarlo a CODIGO ASCII para printearlo
 				MOVH R2, 00h
 				MOVL R2, 86
+					
 				
 				MOVH R4, 00h
 				MOVL R4, 48
 				
 				ADD R1, R1, R2
-				ADD R3, R3, R4
+				;ADD R3, R3, R4
 				
-				MOVH R3, 00111000b
-				MOV [R1], R3
+				MOV R3, [R0] ; Copio el valor dls intenttns a R3
+				MOVH R3, 00111000b ; Dono format al valor de punts
+				MOV [R1], R3 ; Imprimeixo els punts a la posicio 86 amb el format i numero corresponent
 			
 final:
 	; Ficar que s'apaga la pantalla
