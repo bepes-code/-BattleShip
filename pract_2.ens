@@ -664,5 +664,4 @@ ini: ;programa principal
 				MOV [R1], R3 ; Imprimeixo els punts a la posicio 86 amb el format i numero corresponent
 			
 final:
-	; Ficar que s'apaga la pantalla
 	FIN
