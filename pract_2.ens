@@ -1,3 +1,5 @@
+; TO-DO LIST
+
 ; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador ; Guardaro com a teext i printejaro, com la corenada X
 ; Falta comentar la part de (consulta_estat_teclat) linea 203, que no e entes gaire
 ; Implementar els colors amb variables de memoria
@@ -642,6 +644,7 @@ ini: ;programa principal
 				MOVH R0, BYTEALTO DIRECCION marcador_intents
 				MOVL R0, BYTEBAJO DIRECCION marcador_intents
 				
+
 				;El valor de R0 tiene el valor de nummero de intents en numero hexadeciaml pero necesito pasarlo a CODIGO ASCII para printearlo
 				
 				; Definixo la posicio de la pantalla on vuy printejar el resultat
