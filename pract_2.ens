@@ -1,11 +1,9 @@
 ; TO-DO LIST
 
-; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador 
+; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador ---> he revisat i no se perque falla
 ; Falta comentar la part de (consulta_estat_teclat) linea 203, que no e entes gaire
 ; Implementar els colors amb variables de memoria
-; Revisar comentaris imprimri tauler blanc-blau, LNEA 247
-; Repasar rapid comentaris que no m'hagia colat
-; Coimentar la part de mutiplicaicons i calculs que vas fer a consultar_hit
+
 
 
 ; ---------------------------------------------------------------
@@ -274,69 +272,69 @@ ini: ;programa principal
 	
 		
 		; Imprimir tauler de joc (blanc i blau)
-		MOVH R0, BYTEALTO PANTALLA
+		MOVH R0, BYTEALTO PANTALLA				  ; R0 ---> Primera posició PANTALLA
 		MOVL R0, BYTEBAJO PANTALLA
 		
 		MOVH R1, 00h							  ; R1 ---> "Salt" posicions fins primera pos tauler
 		MOVL R1, 19
 		
-		MOVH R5, 00h							  ; R5 ---> posicio proxima fila
+		MOVH R5, 00h							  ; R5 ---> "Salt" posicio proxima fila ("salta" de la última pos fila actual a primera pos fila posterior)
 		MOVL R5, 9
 		
 		ADD R0, R0, R1 							  ; R0 ---> Pimera posicio tauler
 		
-		MOVH R1, 00h 							  ; R1 ---> Iterador files
+		MOVH R1, 00h 							  ; R1 ---> Iterador per imprimir les files
 		MOVL R1, 6
 		
-		MOVH R3, BYTEALTO DIRECCION text_tauler_1 ; R3 ---> que ha d'escriure a cada fila
+		MOVH R3, BYTEALTO DIRECCION text_tauler_1 ; R3 ---> Direcció caràcter que ha d'escriure a cada casella del tauler fila (" ")
 		MOVL R3, BYTEBAJO DIRECCION text_tauler_1
 		
-		MOV R4, [R3]							  ; R4 ---> " "
+		MOV R4, [R3]							  ; R4 ---> Caràcter que ha d'escriure a cada casella del tauler fila (" ")
 		
 		imprimir_files:
-			MOVH R2, 00h 							  ; R1 ---> Iterador imprimir_fila
+			MOVH R2, 00h 				; R2 ---> Iterador per imprimir les caselles d'una fila
 			MOVL R2, 6
 			
 			imprimir_fila_1:			; BLANC -- BLAU -- BLANC -- BLAU -- BLANC -- BLAU
 				MOVH R4, 00111111b		; Color blanc
-				MOV [R0], R4
+				MOV [R0], R4			; Imprimir casella BLANCA
 				INC R0					; Incrementem posicio pantalla
-				DEC R2					; Decremento contador de posicio de la fila
+				DEC R2					; Decremento contador de les caselles de la fila a imprimir
 				
 				MOVH R4, 00001001b		; Color blau
-				MOV [R0], R4
+				MOV [R0], R4			; Imprimir casella BLAVA
 				INC R0                  ; Incrementem posicio pantalla
-				DEC R2					; Decremento contador de posicio de la fila
-				BRNZ imprimir_fila_1
+				DEC R2					; Decremento contador de les caselles de la fila a imprimir
+				BRNZ imprimir_fila_1	; Efectúa el bucle 3 cops, ja que imprimeix 2 caselles (BLANC - BLAU) a cada recorregut
 				
 			
-			MOVH R2, 00h 				; R1 ---> Resetejo contador de columnes
+			MOVH R2, 00h 				; R2 ---> Resetejo contador de caselles a imprimir
 			MOVL R2, 6
 			
-			DEC R1						; Recremento contador de fila
+			DEC R1						; Decremento contador de files a imprimir
 			
-			ADD R0, R0, R5				; Passa a la posició fila seg
+			ADD R0, R0, R5				; Passa a la primera posició de la fila següent
 			
 			imprimir_fila_2:			; BLAU -- BLANC -- BLAU -- BLANC -- BLAU -- BLANC
 				MOVH R4, 00001001b		; Color blau
-				MOV [R0], R4
-				INC R0
-				DEC R2
+				MOV [R0], R4			; Imprimir casella BLAVA
+				INC R0					; Incrementem posicio pantalla
+				DEC R2					; Decremento contador de les caselles de la fila a imprimir
 				
 				MOVH R4, 00111111b		; Color blanc
-				MOV [R0], R4
-				INC R0
-				DEC R2
-				BRNZ imprimir_fila_2
+				MOV [R0], R4			; Imprimir casella BLANCA
+				INC R0					; Incrementem posicio pantalla
+				DEC R2					; Decremento contador de les caselles de la fila a imprimir
+				BRNZ imprimir_fila_2	; Repeteix el bucle 3 cops, ja que imprimeix 2 caselles (BLAU - BLANC) a cada recorregut
 				
 			MOVH R2, 00h 				; R1 ---> Iterador imprimir_fila
 			MOVL R2, 6
 			
 			ADD R0, R0, R5				; Passa a la posició fila seg
 			
-			DEC R1
+			DEC R1						; Decremento contador de files a imprimir
 			
-			BRNZ imprimir_files
+			BRNZ imprimir_files			; Efectúa el bucle 3 cops, ja que imprimeix dues files diferents entre si a cada recorregut
 		RET
 	
 	; DEMANAR COORDENADES 
@@ -469,77 +467,80 @@ ini: ;programa principal
 	; CALCULAR HIT
 	
 	consultar_hit:
-		MOVH R0, BYTEALTO DIRECCION coordenada_x
-		MOVL R0, BYTEBAJO DIRECCION coordenada_x ; X = numeros
-		MOV R0, [R0] ; Llegeixo el valor de X
+		MOVH R0, BYTEALTO DIRECCION coordenada_x	; X ---> Coordenades numériques
+		MOVL R0, BYTEBAJO DIRECCION coordenada_x 
+		MOV R0, [R0] 								; Llegeixo el valor de X
 		
-		MOVH R1, BYTEALTO DIRECCION coordenada_y
-		MOVL R1, BYTEBAJO DIRECCION coordenada_y ; Y = lletres
-		MOV R1, [R1] ; Llegeixo el valor de Y
+		MOVH R1, BYTEALTO DIRECCION coordenada_y	; Y ---> Coordenades de lletres
+		MOVL R1, BYTEBAJO DIRECCION coordenada_y 
+		MOV R1, [R1] 								; Llegeixo el valor de Y
 		
-		MOVH R2, 00h								; ASCII per passar lletres ---> num
+		MOVH R2, 00h								; R2 ---> Valor relacionat amb el codi ASCII per poder "transformar" les lletres ---> num
 		MOVL R2, 96
 		
-		MOVH R6, 00h								; ASCII per passar numeros escrits ---> num
+		MOVH R6, 00h								; R6 ---> Valor relacionat amb el codi ASCII per poder transformar els números en ASCII a números amb els que es pugui operar correctament
 		MOVL R6, 48
 		
-		SUB R0, R0, R6 ; VALOR NUMERO (R0)
+		SUB R0, R0, R6 								; R0 ---> Valor coordenada numérica ---> R0 = ASCII del número - 48 = Valor del número
 
-		MOVH R5, 00h								; Valor salt 1 linia
+		MOVH R5, 00h								; R5 ---> Valor salt 1 línia
 		MOVL R5, 15
 		
 		; POSICIÓ COLUMNA
 		
-		MOVH R3, BYTEALTO PANTALLA					; Primera pos pantalla
+		MOVH R3, BYTEALTO PANTALLA					; R3 ---> Primera pos pantalla
 		MOVL R3, BYTEBAJO PANTALLA
 		
-		MOVH R4, 00h
+		MOVH R4, 00h								; R4 ---> "Salt" de la primera posició de la pantalla a col·lorcar-se en la posició 1 fila per sobre de la coordenada "a" de la graella del tauler ---> Això es fa donat que el bucle mul de més endavant no pot multiplicar per 0
 		MOVL R4, 3
 		
-		ADD R3, R3, R4								; Posicio sobre lletra a interficie
+		ADD R3, R3, R4								; R3 ---> Posició 1 fila per sobre de la coordenada "a" de la graella del tauler
 		
-		ADD R3, R3, R0								; R3 ---> Pos columna a la fila 1
+		ADD R3, R3, R0								; R3 ---> Posició a la primera fila de la pantalla i just una fila per sobre de la coordenada numérica introduïda pel teclat
 		
-		; Lletra ---> numero
+		; LLETRA ---> VALOR NUMÉRIC
 		
-		SUB R4, R1, R2								; R4 ---> valor numeric de la Lletra (a = 1, b = 2, c = 3, ...)
+		SUB R4, R1, R2								; R4 ---> Valor numeric de la Lletra (a = 1, b = 2, c = 3, ...)
 		
-		; Posicio fila
-		XOR R6, R6, R6
-		MOV R2, R4 ; VALOR LLETRA (R2)
-		mul:
-			ADD R6, R6, R5							; R5 ---> salts de linia a fer
+		; POSICIÓ FILA
+		
+		XOR R6, R6, R6								; Inicialitzem R6 a 0
+		MOV R2, R4 									; R2 ---> Valor numéric de la lletra introduïda pel teclat
+		
+		mul:										; R6 ---> Volem calcular quantes posicions ens hem de moure per col·locar-nos en la posició corresponent del tauler de la pantalla
+			ADD R6, R6, R5							; R5 ---> "Salts" de linia a fer
 			DEC R4
-			BRNZ mul
+			BRNZ mul								; Multiplicarem ---> Valor lletra introduïda * Posicions per efectuar un salt de línia
 			
-		ADD R3, R3, R6
+		ADD R3, R3, R6								; R3 ---> Ens col·loquem en la posició corresponent del tauler
 		
-		; Posicio tauler vectors
+		; POSICIÓ TAULER VECTORS
+		
 		MOVH R1, 00h
 		MOVL R1, 1
 		
-		MOVH R5, 00h	; Salt de fila tauler
+		MOVH R5, 00h								; R6 ---> Posicions a "saltar" per colocar-nos una fila per sota de la posició actual dins dels vectors del tauler (6 * 6)
 		MOVL R5, 6
 		
-		XOR R6, R6, R6
+		XOR R6, R6, R6								; Inicialitzem R6 a 0
 		
-		SUB R4, R4, R5 ; R4 te un valor inicial de 0, es pot veure al bucle mul
+		SUB R4, R4, R5 								; R5 ---> 0 - 6 = -6 ---> R4 té valor 0 (es pot veure al bucle mul) ---> Objectiu: "Col·locar-se" una fila per sobre de la primera posició del tauler ---> Això es fa donat que el bucle mul_vec de més endavant no pot multiplicar per 0
 		
-		ADD R4, R4, R0
+		ADD R4, R4, R0								; R4 ---> Ens col·loquem just 1 fila per sobre de la coordenada numérica introduïda pel teclat
 		
-		mul_vec:
-			ADD R6, R6, R5
-			DEC R2
-			BRNZ mul_vec
+		mul_vec:									; R6 ---> Volem calcular quantes posicions ens hem de moure per col·locar-nos en la posició corresponent del tauler
+			ADD R6, R6, R5							; R5 ---> "Salts" de linia a fer	
+			DEC R2									; R2 ---> Valor numéric lletra introduïda pel teclat
+			BRNZ mul_vec							; Multiplicarem ---> Valor lletra introduïda * Posicions per efectuar un salt de línia dins del tauler
 		
-		ADD R4, R4, R6
-		SUB R4, R4, R1
+		ADD R4, R4, R6								
+		SUB R4, R4, R1								; R4 ---> Posicion a moure's a partir de la primera posició del tauler per col·locarnos en la posició corresponent ---> -1 ja que la primera posició "compta" com un 0
 		
 	
-		MOVH R0, BYTEALTO DIRECCION fila_a
+		MOVH R0, BYTEALTO DIRECCION fila_a			; R0 ---> Primera posició del vector que representa el tauler de joc
 		MOVL R0, BYTEBAJO DIRECCION fila_a
-		ADD R0, R0, R4
-		MOV R0, [R0]
+		ADD R0, R0, R4								; R0 ---> Ens col·loquem en la posició corresponent del vector que representa el tauler de joc
+		MOV R0, [R0]								; R0 ---> Valor de la posició del tauler de joc ("0" o "1") 
 		
 
 		
@@ -647,17 +648,17 @@ ini: ;programa principal
 
 				;El valor de R0 tiene el valor de nummero de intents en numero hexadeciaml pero necesito pasarlo a CODIGO ASCII para printearlo
 				
-				; Definixo la posicio de la pantalla on vuy printejar el resultat
+				; Definixo la posicio de la pantalla on vull printejar el resultat
 				
 				MOVH R2, 00h
 				MOVL R2, 86
 					
 				
 				MOVH R4, 00h
-				MOVL R4, 48
+				MOVL R4, 48 ; Priemra posicio del codigo ASCCI dels numeros
 				
 				ADD R1, R1, R2
-				;ADD R3, R3, R4
+				ADD R3, R3, R4
 				
 				MOV R3, [R0] ; Copio el valor dls intenttns a R3
 				MOVH R3, 00111000b ; Dono format al valor de punts
