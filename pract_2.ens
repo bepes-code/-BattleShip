@@ -1,8 +1,7 @@
 ; TO-DO LIST
 
-; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador ---> he revisat i no se perque falla
+; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador 
 ; Falta comentar la part de (consulta_estat_teclat) linea 203, que no e entes gaire
-; Implementar els colors amb variables de memoria
 
 
 
