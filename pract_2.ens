@@ -660,6 +660,8 @@ ini: ;programa principal
 				ADD R1, R1, R2
 				ADD R3, R3, R4
 				
+				; Sutilizen  R3 i R1 
+				
 				MOV R3, [R0] ; Copio el valor dls intenttns a R3
 				MOVH R3, 00111000b ; Dono format al valor de punts
 				MOV [R1], R3 ; Imprimeixo els punts a la posicio 86 amb el format i numero corresponent
