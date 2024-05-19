@@ -1,14 +1,7 @@
-; TO-DO LIST
-
-; Falta arreglar codigo ASCII / o alguna forma de printejar el Contador 
-; Falta comentar la part de (consulta_estat_teclat) linea 203, que no e entes gaire
-
-
-
 ; ---------------------------------------------------------------
 ; Nom alumne 1: Aleix Rosinach
 ; Nom alumne 2: Guillermo Esquinas
-; Grup: 4t
+; Grup: 4 i 3
 ; Sessió: PR-PRA2
 ; --------------------------------------------------------------- 
 
@@ -638,32 +631,55 @@ ini: ;programa principal
 				
 			imprimir_intents:
 				; I finalment imprimir el numero final de intents
-				MOVH R1, BYTEALTO PANTALLA 
-				MOVL R1, BYTEBAJO PANTALLA
+				;MOVH R1, BYTEALTO PANTALLA 
+				;MOVL R1, BYTEBAJO PANTALLA
 				
-				MOVH R0, BYTEALTO DIRECCION marcador_intents
+				MOVH R0, BYTEALTO DIRECCION marcador_intents  ; R3 Direccio valor intents
 				MOVL R0, BYTEBAJO DIRECCION marcador_intents
 				
 
-				;El valor de R0 tiene el valor de nummero de intents en numero hexadeciaml pero necesito pasarlo a CODIGO ASCII para printearlo
 				
 				; Definixo la posicio de la pantalla on vull printejar el resultat
 				
-				MOVH R2, 00h
-				MOVL R2, 86
+				MOVH R1, 00h				; R1 ---> Posicio primer dígit a imprimir
+				MOVL R1, 86
 					
+				MOVH R3, 00h
+				MOVL R3, 48
 				
-				MOVH R4, 00h
-				MOVL R4, 48 ; Priemra posicio del codigo ASCCI dels numeros
+				MOV R4, [R0] 				; R4 ---> Valor dels intents efectuats a R3
 				
-				ADD R1, R1, R2
-				ADD R3, R3, R4
+				MOVH R5, 00h 				; R5 ---> Base decimal per acumular les desenes
+				MOVL R5, 10
 				
-				; Sutilizen  R3 i R1 
+				XOR R6, R6, R6 				; R6 ---> 0 ---> Registre per acumular les desenes
 				
-				MOV R3, [R0] ; Copio el valor dls intenttns a R3
-				MOVH R3, 00111000b ; Dono format al valor de punts
-				MOV [R1], R3 ; Imprimeixo els punts a la posicio 86 amb el format i numero corresponent
-			
+				XOR R0, R0, R0				; R0 ---> 0 ---> Registre per acumular les unitats
+				
+				digits_ascii:
+					
+					INC R0
+					COMP R0, R5
+					BRNZ fi_bucle_digits
+					XOR R0, R0, R0
+					INC R6
+					fi_bucle_digits:
+						DEC R4
+						BRNZ digits_ascii
+				
+				ADD R6, R6, R3
+				ADD R0, R0, R3
+				
+				MOVH R6, 00111000b
+				MOVH R0, 00111000b
+				
+				MOVH R3, BYTEALTO PANTALLA
+				MOVL R3, BYTEBAJO PANTALLA
+				
+				ADD R3, R3, R1
+				MOV [R3], R6
+				
+				INC R3
+				MOV [R3], R0
 final:
 	FIN
