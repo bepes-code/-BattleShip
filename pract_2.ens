@@ -1,15 +1,4 @@
-; ---------------------------------------------------------------
-; Nom alumne 1: Aleix Rosinach
-; Nom alumne 2: Guillermo Esquinas
-; Grup: 4 i 1
-; Sessió: PR-PRA2
-; --------------------------------------------------------------- 
-
-;---------------------------------------
-;| BATELSHIP GAME BY ALEIX & GUILLERMO |
-;---------------------------------------
-
-
+; Comments on this porject are writted in Catalan
 ; Inicialitzem el teclat i la pantalla a les seves dirrecions
 TECLAT EQU 0E000h
 PANTALLA EQU 0F000h
